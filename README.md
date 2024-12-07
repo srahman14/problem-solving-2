@@ -1,4 +1,4 @@
-Problem Solving 2
+# Problem Solving 2 
 
 Problem 1: European League One
 Objective: Create a Swiss Model league draw for 36 teams divided into 4 pots.
