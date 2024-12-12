@@ -26,69 +26,87 @@ def showBoard(size):
      print("|") # Print the right border of the row
      print()
 
-def mapping(pos, player):
-    for row in matrix:
-        for k in row:
-            if k == pos:
-                row[row.index(k)] = player
-
+def initialisePrevPositions():
+    count = 1
+    for i in bridges:
+        mapping(i, f"B{count}")
+        bridgesPrev[f"B{count}"] = i
+        count += 1
+    
+    count = 1
+    for i in hotels:
+        mapping(i, f"H{count}")
+        hotelsPrev[f"B{count}"] = i
+        count += 1
+    
 bridges = {
-   4: 9,
-   8: 15,
-   12: 20,
-   18: 30,
-   24: 34,
-   29: 34,
-   35: 39,
-   40: 50,
-   46: 52,
-   50: 53,
-   51: 57,
+   4: 9, 8: 15, 12: 20, 18: 30,
+   24: 34, 29: 34, 35: 39, 40: 50,
+   46: 52, 50: 53, 51: 57,
 }
 
 bridgesPrev = {}
 
 hotels = {
-   10: 1,
-   21: 1,
-   30: 1,
-   38: 1,
-   45: 1,
-   57: 1,
+   10: 1, 21: 1, 30: 1,
+   38: 1, 45: 1, 57: 1,
    61: 1,
 }
 
 hotelsPrev = {}
 
-count = 1
-for i in bridges:
-    mapping(i, f"B{count}")
-    bridgesPrev[f"B{count}"] = i
-    count +=1
+def getBridgePrev(pos):
+    indexOfBridge = list(bridgesPrev.values()).index(pos)
+
+    keyBridge, valueBridge = list(bridgesPrev.items())[indexOfBridge]
+
+    return keyBridge
+
+def getHotelPrev(pos):
+    indexOfHotel= list(hotelsPrev.values()).index(pos)
+    keyHotel, valueHotel= list(hotelsPrev.items())[indexOfHotel]
+
+    return keyHotel
 
 
-count = 1
-for i in hotels:
-    mapping(i, f"H{count}")
-    hotelsPrev[f"H{count}"] = i
-    count +=1
+def mapping(pos, player):
+    bridgePrev = None
+    hotelPrev = None
 
-# NEED FIX
-# def getBridgePrev(pos):
-#     indexOfBridge = list(bridgesPrev.values()).index(pos)
+    try:
+        bridgePrev = getBridgePrev(pos)
+    except ValueError:
+        pass
 
-#     if indexOfBridge:
-#         keyBridge, valueBridge = list(bridgesPrev.items())[indexOfBridge]
+    try:
+        hotelPrev = getHotelPrev(pos)
+    except ValueError:
+        pass
 
-#     return keyBridge
+    tileToMap = bridgePrev or hotelPrev or pos
 
-# def getHotelPrev(pos):
-#     indexOfHotel= list(hotelsPrev.values()).index(pos)
+    for row in matrix:
+        for k in row:
+            if k == tileToMap:
+                row[row.index(k)] = player
+                return
 
-#     if indexOfHotel:
-#         keyHotel, valueHotel= list(hotelsPrev.items())[indexOfHotel]
+def resetPosition(pos):
+    for row in matrix:
+        for i, cell in enumerate(row):
+            if cell == pos:
+                if pos in bridgesPrev.values():
+                    symbol = getBridgePrev(pos)
+                    row[i] = symbol
+                elif pos in hotelsPrev.values():
+                    symbol = getHotelPrev.values()
+                    row[i] = symbol
+                else:
+                    row[i] = pos
 
-#     print(valueHotel)
+
+# To set all of the special tiles before beginning game
+initialisePrevPositions()
 
 win = False
 # For hotels
@@ -100,67 +118,63 @@ playerTwoPos = 1
 previousPositionOne = 0
 previousPositionTwo = 0
 
-# while not win:
-#     time.sleep(1)
-#     if previousPositionOne != 0:
-#        mapping("P1", previousPositionOne)
-#        previousPositionOne = 0
-#     if previousPositionTwo != 0:
-#        mapping("P2", previousPositionTwo)
-#        previousPositionTwo = 0
+while not win:
+    time.sleep(1)
+    if previousPositionOne != 0:
+       resetPosition(playerOnePos)
+       previousPositionOne = playerOnePos
+    if previousPositionTwo != 0:
+        resetPosition(playerTwoPos)
+        previousPositionTwo = playerTwoPos
     
-#     if playerOnePos in hotels and skippedTurnOne != False:
-#        print("Player 1 turn skipped!")
-#        skippedTurnOne = False
-#     else:
-#         diceRollOne = random.randint(1, 6)
-#         print("Player 1 Turn: \n")
-#         input("Enter to roll the dice! ")
-#         print("Dice roll: ", end =" ")
-#         time.sleep(3)
-#         print(diceRollOne)
-#         playerOnePos += diceRollOne
-#         previousPositionOne = playerOnePos
-#         print(f"Player one score: {playerOnePos}")
+    if playerOnePos in hotels and not skippedTurnOne:
+       print("Player 1 turn skipped!")
+       skippedTurnOne = True
+    else:
+        diceRollOne = random.randint(1, 6)
+        print("Player 1 Turn: \n")
+        input("Enter to roll the dice! ")
+        print("Dice roll: ", end =" ")
+        time.sleep(3)
+        print(diceRollOne)
+        playerOnePos += diceRollOne
+        previousPositionOne = playerOnePos
+        print(f"Player one score: {playerOnePos}")
+        skippedTurnOne = False
 
-#     if playerTwoPos in hotels and skippedTurnTwo != False:
-#        print("Player 2 turn skipped!")
-#        skippedTurnTwo = False
-#     else:
-#         diceRollTwo = random.randint(1, 6)
-#         print("Player 2 Turn: \n")
-#         input("Enter to roll the dice! ")
-#         print("Dice roll: ", end =" ")
-#         time.sleep(3)
-#         print(diceRollTwo)
-#         playerTwoPos += diceRollTwo
-#         previousPositionTwo  = playerTwoPos
-#         print(f"Player tow score: {playerTwoPos}")
+    if playerTwoPos in hotels and not skippedTurnTwo:
+       print("Player 2 turn skipped!")
+       skippedTurnTwo = True
+    else:
+        diceRollTwo = random.randint(1, 6)
+        print("Player 2 Turn: \n")
+        input("Enter to roll the dice! ")
+        print("Dice roll: ", end =" ")
+        time.sleep(3)
+        print(diceRollTwo)
+        playerTwoPos += diceRollTwo
+        previousPositionTwo  = playerTwoPos
+        print(f"Player tow score: {playerTwoPos}")
+        skippedTurnTwo = False
+
+    #     if (playerOnePos in hotels):
+    #        skippedTurnOne = True
+    #     if (playerTwoPos in hotels):
+    #        skippedTurnTwo = True
+
     
-# NEED TO CHECK FOR B1/H1 for example to MAP correctly
-#     bridgePrevOne = getBridgePrev(playerOnePos)
-#     bridgePrevTwo = getBridgePrev(playerTwoPos)
-#     hotelPrevOne = getHotelPrev(playerOnePos)
-#     hotelPrevTwo = getHotelPrev(playerTwoPos)
+    if playerOnePos == playerTwoPos:
+       mapping(playerOnePos, "P1/2")
+    else:
+        mapping(playerOnePos, "P1") 
 
-#     if (playerOnePos in hotels):
-#        skippedTurnOne = True
-#     if (playerTwoPos in hotels):
-#        skippedTurnTwo = True
-
-#     if playerOnePos == playerTwoPos:
-#        mapping(playerOnePos, "P1/2")
-#     else:
-#        mapping(playerTwoPos, "P2")
-#        mapping(playerOnePos, "P1") 
+        mapping(playerTwoPos, "P2")
 
 
-#     time.sleep(2)
-#     print("Game of Goose: \n")
-#     time.sleep(2)
-#     showBoard(size)
+    time.sleep(2)
+    print("Game of Goose: \n")
+    time.sleep(2)
+    showBoard(size)
 
-# result = mapping(1)
 
-# print(result)
-
+# MAPPING FUNCTION NOT WORKING, THE VALUES DO NOT MAP AFTER EVERY TURN
