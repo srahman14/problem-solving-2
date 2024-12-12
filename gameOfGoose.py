@@ -73,24 +73,22 @@ for i in hotels:
     hotelsPrev[f"H{count}"] = i
     count +=1
 
-def getBridgePrev(pos):
-    indexOfBridge = list(bridgesPrev.values()).index(pos)
+# NEED FIX
+# def getBridgePrev(pos):
+#     indexOfBridge = list(bridgesPrev.values()).index(pos)
 
-    if indexOfBridge:
-        keyBridge, valueBridge = list(bridgesPrev.items())[indexOfBridge]
+#     if indexOfBridge:
+#         keyBridge, valueBridge = list(bridgesPrev.items())[indexOfBridge]
 
-    return keyBridge
+#     return keyBridge
 
-def getHotelPrev(pos):
-    indexOfHotel= list(hotelsPrev.values()).index(pos)
+# def getHotelPrev(pos):
+#     indexOfHotel= list(hotelsPrev.values()).index(pos)
 
-    if indexOfHotel:
-        keyHotel, valueHotel= list(hotelsPrev.items())[indexOfHotel]
+#     if indexOfHotel:
+#         keyHotel, valueHotel= list(hotelsPrev.items())[indexOfHotel]
 
-    print(valueHotel)
-
-getHotelPrev(10)
-
+#     print(valueHotel)
 
 win = False
 # For hotels
@@ -139,7 +137,7 @@ previousPositionTwo = 0
 #         previousPositionTwo  = playerTwoPos
 #         print(f"Player tow score: {playerTwoPos}")
     
-
+# NEED TO CHECK FOR B1/H1 for example to MAP correctly
 #     bridgePrevOne = getBridgePrev(playerOnePos)
 #     bridgePrevTwo = getBridgePrev(playerTwoPos)
 #     hotelPrevOne = getHotelPrev(playerOnePos)
