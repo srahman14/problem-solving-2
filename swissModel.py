@@ -31,99 +31,125 @@ pot_data = {
     ]
 }
 
-# pots = list(zip(pot_data["Pot1"], pot_data["Pot2"], pot_data["Pot3"], pot_data["Pot4"]))
-# df = pd.DataFrame(pots, columns=pot_data.keys())
-
-# Hold the team opponents
-teamGames = {team: {"home": [], "away": []} for pot in pot_data.values() for team in pot}
+pots = list(zip(pot_data["Pot1"], pot_data["Pot2"], pot_data["Pot3"], pot_data["Pot4"]))
+df = pd.DataFrame(pots, columns=pot_data.keys())
 
 # Shuffle the pots
 for pot in pot_data.values():
     random.shuffle(pot)
 
-# Each team has 4 home games and 4 away games -> 8 games in total
-# No team can have more than 8 opponents
-# Each team faces two opponents from each of the pots
-# So lets start from the first pot till the last pot and add 1 home game and 1 away game for each
+teams = [team for pot in pot_data.values() for team in pot]
 
-def pairTeams(teamGames, pot):
-    # Initalize variables to track the pots
+def pairTeams(teams, pots):
+    # Each team has 4 home games and 4 away games -> 8 games in total
+    # No team can have more than 8 opponents
+    # Each team faces two opponents from each of the pots
 
-    for potNum in range(1, 5):
-        currentPot = f"Pot{potNum}"
-        teams = pot[currentPot]
+    # Args:
+    # - teams (list): List of all teams
+    # - pots (dict): keys => pot names and values => team names 
 
+    # Return:
+    # - dictionary: with all team games
+
+    # Create team games for all teams
+    teamGames = {team: [] for team in teams}
+
+    for potName in pots:
         for team in teams:
-            # Set the current home and away games for the current team
-            homeGames = teamGames[team]["home"]
-            awayGames = teamGames[team]["away"]
+            # Check for number of games for the current team
+            totalGames = len(teamGames[team]) 
 
-            # Track the remaining number of games to assign for home and away
-            remainingHome = 4 - len(homeGames)
-            remainingAway = 4 - len(awayGames)
+            # If a team already has 8 teams, then the iteration should skip
+            if totalGames >= 8:
+                continue
 
-            # If there are still remaining home games continue to assign:
-            while remainingHome > 0:
-                # Find an opponent from other pots
-                for opponentPotNum in range(1, 5):
-                    if remainingHome == 0:
-                        break
+            # Generate opponents not already played against for current team to select
+            # the team games for the current team
+            opponentsToPlay = [
+                # Get every team in the pot besides the team itself
+                opponent for opponent in pots[potName]
+                if opponent != team and 
+                # The opponent should not already be playing the current team
+                opponent not in teamGames[team]
+                # The number of games for a opponent should not already be 8
+                and len(teamGames[opponent]) < 8
+            ]
+            # If the number of games for any team is less than 8
+            if len(teamGames[team]) < 8:
+                # If the number of available teams is at least two, then we can assign
+                # two teams to the current pot 
+                if len(opponentsToPlay) >= 2:
+                    opponents = random.sample(opponentsToPlay, 2)
+                    teamGames[team].extend(opponents)
 
-                    if opponentPotNum == potNum:
-                        continue
-
-                    oppoentPot = f"Pot{opponentPotNum}"
-                    opponents = pot[oppoentPot]
-
-                    for opponent in opponents:
-                        # Check if the number of home games is less than 4, for the current team
-                        # and if the away games are less than 4 for opponent team
-                        # Check if that team is not already playing the opponent team
-                        if opponent not in homeGames and len(teamGames[opponent]["home"]) < 4:
-                            homeGames.append(opponent)
-                            teamGames[opponent]["away"].append(team)
-                            remainingHome -= 1
-                            break
-                                    
-                        # Check if the number of away games is less than 4, for the current team
-                        # and if the home games are less than 4 for opponent team
-                while remainingAway > 0:
-                    for potNumOpponent in range(1, 5):
-                        if remainingAway == 0:
-                            break
-                        if opponentPotNum == potNum:
-                            continue
-                    oppoentPot = f"Pot{opponentPotNum}"
-                    opponents = pot[oppoentPot]
-
-                    for opponent in opponents:
-                        # Check if the number of home games is less than 4, for the current team
-                        # and if the away games are less than 4 for opponent team
-                        # Check if that team is not already playing the opponent team
-                        if opponent not in awayGames and len(teamGames[opponent]["away"]) < 4:
-                            awayGames.append(opponent)
-                            teamGames[opponent]["home"].append(team)
-                            remainingAway -= 1
-                            break             
+    
     return teamGames
 
-result = pairTeams(teamGames, pot_data)
-print(result)
+# Requirement 1 - display the four pots:
+print(df)
+print()
+# Requirement 2 - draw teams 
+result = pairTeams(teams, pot_data)
+# Requirement 3/4 - show draw of opponents 
+def showOpponents(draws):
+    for team, opponents in draws.items():
+        print(f"\nDraw for {team}: ")
+        # Variable to alternate between home and away
+        currGame = "Home"
+        
+        for i in opponents:
+            print(f"- {i} ({currGame})")
+            # If this team was assigned home
+            if currGame == "Home":
+                # Then next team should be assumed away
+                currGame = "Away"
+            else:
+                # Else it should be assigned to home
+                currGame = "Home"
+        input("\nEnter to view the next team")
 
-def validateTeamGames(teamGames):
-    for team, matches in teamGames.items():
-        home_games = len(matches["home"])
-        away_games = len(matches["away"])
-        total_games = home_games + away_games
+showOpponents(result)
 
-        if home_games != 4:
-            print(f"Error: {team} has {home_games} home games!")
-        if away_games != 4:
-            print(f"Error: {team} has {away_games} away games!")
-        if total_games != 8:
-            print(f"Error: {team} has {total_games} total games!")
-            
-    print("Validation complete.")
+# Requirement 6 - specific team draws
+def displaySpecificTeam(teams):
+    # Variable to hold if the user would like to check for the draw of a specific team
+    userInput = ""
+    # If user input invalid input, then continue to ask until Y or N entered
+    while userInput.lower().strip() != "y" or "n":
+        userInput = str(input("Would you like to check for the draw of a specific team: (Y/N)"))
 
-# Call the function with your teamGames dictionary
-validateTeamGames(result)
+        if userInput.lower().strip() == "y" or "n":
+            break
+    # if a user enters N, then program should quit
+    if userInput.strip().lower() == "n":
+        print("Program exited")
+        return False
+    # Similar logic for displayOpponents() func, used to alternate between home and away
+    currGame = "Home"
+    while userInput.lower().strip() == "y":
+        teamChoice = ""
+        # if team not in the teams list, then repeat asking for the team name
+        # use the .title() to capitalize each of the first letters in the team name
+        while teamChoice.title() not in teams:
+            teamChoice = str(input("Enter the name of the team you would like to view: "))
+            if teamChoice.title() in teams:
+                break
+        # Variable to hold the team opponent names in a list 
+        teamSelected = teams[teamChoice.title()]
+        print(f"Draw for {teamChoice}: ")
+        # Where i, is the opponent
+        for i in teamSelected:
+            print(f"- {i} ({currGame})")
+            if currGame == "Home":
+                currGame = "Away"
+            else:
+                currGame = "Home"
+        break
+    
+while True:
+    if not displaySpecificTeam(result):
+        break
+    else:
+        displaySpecificTeam(result)
+    
